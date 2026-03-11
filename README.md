@@ -1,3 +1,12 @@
+## Documentation
+
+Detailed documentation can be found in the **docs** folder:
+
+- Architecture overview → docs/architecture.md
+- Domain model → docs/domain-model.md
+- Order decision engine → docs/decision-engine.md
+
+
 ![.NET](https://img.shields.io/badge/.NET-ASP.NET%20Core-blue)
 ![Architecture](https://img.shields.io/badge/Architecture-Modular%20Monolith-green)
 ![DDD](https://img.shields.io/badge/Pattern-Domain%20Driven%20Design-orange)
