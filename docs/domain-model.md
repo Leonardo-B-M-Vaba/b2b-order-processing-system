@@ -35,3 +35,11 @@ Attributes:
 
 - ProductId
 - AvailableQuantity
+
+# Aggregates
+
+- Order
+- Contract
+- Inventory
+- Shipment
+- Invoice
