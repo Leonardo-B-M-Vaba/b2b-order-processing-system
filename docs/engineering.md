@@ -1,8 +1,8 @@
 # Code Quality
 
--Clean Architecture
--Domain-Driven Design
--SOLID principles
+- Clean Architecture
+- Domain-Driven Design
+- SOLID principles
 
 ---
 
@@ -10,13 +10,13 @@
 
 ## Tipos de testes
 
--Unit Tests
--Integration Tests
--Domain Tests
+- Unit Tests
+- Integration Tests
+- Domain Tests
 
 ---
 
 # Observability
--Logging
--Metrics
--Tracing
+- Logging
+- Metrics
+- Tracing
