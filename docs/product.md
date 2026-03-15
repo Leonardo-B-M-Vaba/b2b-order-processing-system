@@ -1,4 +1,3 @@
-Product Definition
 
 # Product vision 
 
