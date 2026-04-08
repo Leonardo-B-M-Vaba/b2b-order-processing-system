@@ -300,7 +300,7 @@ InventoryItem
 
 ---
 
-###Order Lifecycle
+### Order Lifecycle
 
 * DRAFT
 * SUBMITTED
@@ -341,7 +341,7 @@ This project includes realistic enterprise scenarios:
 * Multi-step approval workflows
 * Event-driven failure recovery
 * Retry mechanisms for failed processes
-* 
+  
 ---
 
 ## Features
