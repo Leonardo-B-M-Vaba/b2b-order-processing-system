@@ -16,33 +16,36 @@ Detailed documentation can be found in the **docs** folder:
 
 ## Overview
 
-The **B2B Order Processing System** simulates an enterprise backend platform used by companies to process and manage large purchase orders between businesses.
+The **B2B Order Processing System** simulates an enterprise-grade backend platform responsible for processing complex purchase orders between businesses.
 
-The project demonstrates how complex business domains can be modeled and implemented using modern backend architecture principles such as:
+Unlike simple CRUD-based systems, this project focuses on **automated business decision-making**, replicating real-world enterprise scenarios such as credit evaluation, contract validation, inventory allocation, and approval workflows.
+
+The system is designed using:
 
 * Domain-Driven Design (DDD)
 * Clean Architecture
 * Modular Monolith Architecture
 * Event-Driven Design
 
-The main goal of the project is to demonstrate how business decisions and validations in B2B environments can be automated through a well-structured backend system.
+The core objective is to demonstrate how business rules, risk evaluation, and operational workflows can be modeled and executed in a scalable and maintainable backend system
 
 ---
 
 # Business Problem
 
-In B2B environments, purchase orders usually require multiple validation steps before they can be accepted and processed.
+In real-world B2B environments, order processing is far from trivial.
 
-Typical validations include:
+Before an order is accepted, companies must evaluate:
 
-* Contract verification
-* Credit limit validation
-* Inventory availability
-* Approval workflows for large orders
+* Contract validity
+* Customer credit limits
+* Pricing agreements
+* Inventory availability across warehouses
+* Risk and approval requirements
 
-In many companies, these checks are still performed manually or across poorly integrated systems.
+These processes are often fragmented across multiple systems or performed manually, leading to inefficiencies, delays, and errors.
 
-This project demonstrates how these processes can be automated using a domain-driven backend system capable of evaluating orders and making intelligent processing decisions.
+This project demonstrates how to centralize and automate these decisions through a **domain-driven decision engine**.
 
 ---
 
@@ -54,37 +57,42 @@ Following **Domain-Driven Design principles**, the system domain is divided into
 
 ### Order Decision Engine
 
-The **Order Decision Engine** represents the core business capability of the platform.
+The **Order Decision** Engine is the heart of the system.
 
-This engine evaluates incoming orders and determines how they should be processed.
+It evaluates incoming purchase orders using a policy-based decision model, applying multiple business rules:
 
-Business rules applied by the engine include:
+* Credit Policy
+* Contract Policy
+* Inventory Policy
+* Pricing Policy
+* Risk Policy
 
-* Credit limit validation
-* Contract validation
-* Inventory availability checks
-* Approval rules based on order value
+Each policy produces a decision result:
 
-Based on these validations the system can automatically decide whether an order should be:
+* Valid / Invalid
+* Reason
+* Severity
+
+Based on these evaluations, the system determines whether an order should be:
 
 * Approved
 * Rejected
-* Sent for manual review
-* Routed for managerial approval
+* Partially Approved
+* Sent for Manual Review
+* Escalated for Approval
 
-This automated decision process represents the **core value of the system**.
+This engine represents the core competitive advantage of the system.
 
 ---
 
 ## Supporting Subdomains
 
-Supporting domains provide additional functionality required by the core domain.
-
-Examples include:
+These domains support the core business logic:
 
 * Order Management
-* Shipment Handling
-* Invoice Generation and Processing
+* Fulfillment (Shipment & Logistics)
+* Billing & Invoicing
+* Inventory Management
 
 ---
 
@@ -94,11 +102,12 @@ Generic domains represent common technical capabilities that exist in most softw
 
 These domains usually do not provide competitive advantage.
 
-Examples include:
+Common cross-cutting concerns:
 
 * Authentication
 * Logging
 * Notifications
+* Monitoring
 
 ---
 
@@ -110,6 +119,7 @@ The system follows modern architecture principles including:
 * Clean Architecture
 * Modular Monolith Architecture
 * Separation of Concerns
+* Event-Driven Architecture
 
 The application is organized into logical modules representing business capabilities.
 
@@ -125,18 +135,20 @@ Client --> API
 API --> OrdersModule
 API --> DecisionEngine
 
-DecisionEngine --> ContractValidation
-DecisionEngine --> CreditValidation
-DecisionEngine --> InventoryValidation
+DecisionEngine --> ContractPolicy
+DecisionEngine --> CreditPolicy
+DecisionEngine --> InventoryPolicy
+DecisionEngine --> PricingPolicy
 
 DecisionEngine --> OrderDecision
 
 OrderDecision --> Approved
 OrderDecision --> Rejected
 OrderDecision --> ManualReview
+OrderDecision --> PartialApproval
 
-Approved --> ShipmentModule
-Approved --> InvoiceModule
+Approved --> FulfillmentModule
+Approved --> BillingModule
 ```
 
 ---
@@ -189,13 +201,9 @@ src
  │   │    └── Infrastructure
  │   │
  │   ├── Orders
- │   │    ├── Domain
- │   │    ├── Application
- │   │    └── Infrastructure
- │   │
- │   ├── Shipment
- │   │
- │   └── Invoices
+ │   ├── Fulfillment
+ │   ├── Billing
+ │   ├── Inventory
  │
  ├── SharedKernel
  │    ├── Base
@@ -216,15 +224,17 @@ This structure keeps the system modular while maintaining the simplicity of a mo
 
 The order processing workflow is centered around the **Order Decision Engine**.
 
-Order Received
+Order Submitted
 ↓
 Contract Validation
 ↓
-Credit Validation
+Credit Evaluation
 ↓
-Inventory Check
+Inventory Allocation
 ↓
-Approval Rules
+Pricing Rules
+↓
+Risk Analysis
 ↓
 Decision
 
@@ -232,6 +242,7 @@ Possible decisions:
 
 * APPROVED
 * REJECTED
+* PARTIALLY_APPROVED
 * MANUAL_REVIEW
 * APPROVAL_REQUIRED
 
@@ -241,15 +252,30 @@ Possible decisions:
 
 Main domain entities include:
 
-### Order
+### PurchaseOrder
 
 ```
-Order
+PurchaseOrder
  - Id
  - CustomerId
- - Items
+ - OrderLines
+ - Currency
  - TotalAmount
  - Status
+ - CreatedAt
+ - ApprovedAt
+ - RejectionReason
+```
+
+### OrderLine
+
+```
+OrderLine
+ - ProductId
+ - Quantity
+ - UnitPrice
+ - Discount
+ - Total
 ```
 
 ### Contract
@@ -260,55 +286,74 @@ Contract
  - CustomerId
  - ExpirationDate
  - CreditLimit
+ - PricingRules
 ```
 
-### Inventory Item
+### InventoryItem
 
 ```
 InventoryItem
  - ProductId
+ - WarehouseId
  - AvailableQuantity
 ```
 
 ---
 
+###Order Lifecycle
+
+* DRAFT
+* SUBMITTED
+* UNDER_REVIEW
+* APPROVED
+* PARTIALLY_APPROVED
+* REJECTED
+* FULFILLED
+* SHIPPED
+* INVOICED
+* CANCELLED
+
+---
+
 # Domain Events
 
-Domain events are used to decouple modules and automate workflows.
-
-Examples of events:
-
-* OrderCreatedEvent
+* OrderSubmittedEvent
 * OrderApprovedEvent
 * OrderRejectedEvent
+* OrderPartiallyApprovedEvent
+* CreditLimitExceededEvent
+* InventoryReservedEvent
+* InventoryUnavailableEvent
 * ShipmentCreatedEvent
+* InvoiceGeneratedEvent
+* InvoiceFailedEvent
 
-Example workflow using events:
+---
 
-OrderCreated
-↓
-OrderDecisionEngine evaluates the order
-↓
-OrderApprovedEvent published
-↓
-Shipment Module creates shipment
-↓
-Invoice Module generates invoice
+# Advanced Business Scenarios
 
-This event-driven approach improves scalability and modularity.
+This project includes realistic enterprise scenarios:
 
+* Partial order fulfillment
+* Backorder handling
+* Multi-warehouse inventory allocation
+* Credit risk evaluation
+* Multi-step approval workflows
+* Event-driven failure recovery
+* Retry mechanisms for failed processes
+* 
 ---
 
 ## Features
 
-- Create and manage B2B orders
-- Automated order validation
-- Contract verification
-- Credit limit validation
-- Inventory availability checks
-- Order approval workflows
+- Create and manage B2B purchase orders
+- Automated decision engine
+- Policy-based validation system
+- Contract and pricing validation
+- Credit risk management
+- Inventory allocation
+- Approval workflows
 - Event-driven processing
-- Modular monolithic architecture
 
 ---
 
